@@ -1,4 +1,11 @@
-
+/*
+  Project "Smart Energy Meter" using current sensor arduino and GSM Module and a display
+  To monitor energy consumption and cost and delelop a pre-paid system with notification and digital control of sort...
+  Developed by Sakib Ahmed Sumdany, Adnan Sabbir
+  November 14, 2016.
+  Released into the public domain.
+  Dependencies: ACS712 Library by Sakib Ahmed
+*/
 
 
 #include<EEPROM.h>
@@ -6,26 +13,28 @@
 //Used for GSM
 #include <SoftwareSerial.h>
 SoftwareSerial mySerial(7, 8);
-
-//For current Sensor
-#include "ACS712.h"
-float error= 0.05;
- ACS712 ac1(A0, error);
 int smsnum =27;
 String readMsg = "AT+CMGR="; 
 int smsTimeP=millis()/1000;
 bool alert=true;
 
+//For current Sensor
+//#include <ACS712.h>
+#include "ACS712.h"
+float error= 0.05;    // initial error of ACS712 sensor
+ ACS712 ac1(A0, error);
+
 double current=0L;
 double power=0L;
 double load=0L;
-float balance=1000.00f;
-float unit =1000.00f;
+float balance=0.00f;
+float unit =0.00f;
 
 float unitPrice =5.00f;
 
 long lastPrint = millis();
 long lastDtl = millis();
+
 String BalanceSms = "This is an SMS from Smart Energy Meter & you balance is ";
 
 
@@ -38,31 +47,30 @@ void setup(){
   mySerial.begin(9600);   // Setting the baud rate of GSM Module 
   Serial.begin(9600);
 
-  reStoreInfo();
+  reStoreInfo();   //restore data from arduino's Static memory after reboot/ power failure
 
   printInfo();
-//BalanceSms();
 
-
-
+//balanceSms();
 //call();
+
  delay(100);
 }
 
 void loop(){
 
-if((millis() - lastDtl)>10000) //print balance and usage
-{
+if((millis() - lastDtl)>10000) //to counter a bug in the program
+{                              //stopping the repetitive send sms for 
  mySerial.begin(9600);
   lastDtl = millis();
 }
 
- current = ac1.getACcurrent();
+ current = ac1.getACcurrent();   //power calculations
  power=current*220.00L;
- load =(power/(1000.0L*3600.0L));
- unit+=load;
+ load =(power/(1000.0L*3600.0L)); // instantanious load
+ unit+=load;                      //Cumulated load or power consumption
   
- balance -=load*unitPrice;
+ balance -=load*unitPrice;        // balance adjustment
     
 storeInfo();
 printDetails();
@@ -71,18 +79,20 @@ printDetails();
 
 
 
-if((millis() - lastPrint)>5000) //print balance and usage
-{
-  printInfo();
-  lastPrint = millis();
-}
+    if((millis() - lastPrint)>5000) //print balance and usage every 5 seconds without using delay()
+    {
+      printInfo();
+      lastPrint = millis();
+    }
 
-if(balance < 20 && alert)
+if(balance < 20 && alert)     //notify customer about low balance
 {
     balanceSms();
     alert = false;
 }
-bool s=false;
+      
+      
+ {     bool s=false;
 
       while (mySerial.available()>0)
        {
@@ -100,6 +110,8 @@ bool s=false;
     balanceSms();
     
     }
+}
+
 
 {  //user interactions // comands
 if (Serial.available()>0)
