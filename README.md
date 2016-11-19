@@ -7,3 +7,5 @@ Smart Energy Meter with SIM900 and Current Sensor
   November 14, 2016.
   Released into the public domain.
   Dependencies: ACS712 Library by Sakib Ahmed
+  
+ https://www.youtube.com/watch?v=GyTl6QiHSSM
