@@ -4,7 +4,7 @@
   Developed by Sakib Ahmed Sumdany & Adnan Sabbir
   November 14, 2016.
   Released into the public domain.
-  Dependencies: ACS712 Library by Sakib Ahmed
+  Dependencies: ACS712 Library by Sakib Ahmed (the .cpp and .h files are attached here, so, no need to download additionally )
 */
 #include<EEPROM.h>
 
@@ -58,14 +58,14 @@ void setup(){
 
   mySerial.begin(9600);
   gsm_init();
-  mySerial.println("AT+CNMI=2,2,0,0,0");
+  mySerial.println("AT+CNMI=2,2,0,0,0");  // AT Command to recieve a live(new/unread) SMS 
   
 
 }
 
 void loop(){
  
-if(balance>0)
+if(balance>0)                       // Power Cut-off if no balance , hence no need for power calculations
 {
   currentCalculation();
   storeInfo();
